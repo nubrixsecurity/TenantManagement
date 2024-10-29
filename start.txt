@@ -1,0 +1,62 @@
+<##########
+
+PLEASE READ THIS SECTION
+
+The steps outlined below will run the program and create a shortcut named 
+Management-Program on your desktop for easy use. 
+
+You will only need to follow these steps ONCE!
+
+To get started:
+1. Launch PowerShell
+2. Copy paste the following command into the PowerShell command line:
+
+try { git --version } catch { Start-Process winget -ArgumentList "install", "--id", "Git.Git", "-e", "--source", "winget" -Verb RunAs -Wait }; Start-Process powershell -ArgumentList "-Command Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force" -Verb RunAs -Wait; Rename-Item -Path "$env:USERPROFILE\Downloads\start.txt" -NewName "start.ps1"; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$env:USERPROFILE\Downloads\start.ps1`"" -Verb RunAs -Wait; Start-Process -FilePath "$env:USERPROFILE\Desktop\Management-Program.lnk" -Wait; Exit
+
+3. Say YES to all prompts
+4. Go to the Desktop and launch the Management-Program
+
+##########>
+
+# CREATE DIRECTORY FOLDERS
+$clonePath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents\Management-Program"
+
+if (Test-Path -Path $clonePath) {
+    Remove-Item $clonePath -Recurse -Force
+}
+
+New-Item $clonePath -Type Directory
+git clone https://github.com/nubrixsecurity/TenantManagement $clonePath
+
+# UNBLOCK FILES
+$files = Get-ChildItem $clonePath -Recurse -File
+
+foreach ($file in $files) {
+    Unblock-File -Path $file.FullName -Confirm:$false
+}
+
+# Create Shortcut
+$scriptPath = Join-Path -Path $clonePath -ChildPath "main.ps1"
+$shortcutPath = Join-Path -Path $env:USERPROFILE -ChildPath "Desktop\Management-Program.lnk"
+
+$wsh = New-Object -ComObject WScript.Shell
+$shortcut = $wsh.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+$shortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`""
+$shortcut.WorkingDirectory = $clonePath
+$shortcut.IconLocation = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+$shortcut.Save()
+
+# Clean up
+$startTxtPath = Join-Path -Path $clonePath -ChildPath "start.txt"
+$startPs1Path = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads\start.ps1"
+
+# Remove start.txt if it exists
+if (Test-Path -Path $startTxtPath) {
+    Remove-Item -Path $startTxtPath -Force
+}
+
+# Remove start.ps1 if it exists
+if (Test-Path -Path $startPs1Path) {
+    Remove-Item -Path $startPs1Path -Force
+}
