@@ -1,3 +1,7 @@
+$ExchangeConnectionTextBlock.Text = "Importing modules..."
+$ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Gray
+$authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
+
 # Check if the Microsoft Graph module is installed
 Write-Host "Checking for Microsoft Graph module..." -ForegroundColor Yellow
 if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
