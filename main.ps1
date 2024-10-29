@@ -1,4 +1,5 @@
-$path = Join-Path -Path $env:USERPROFILE -ChildPath "Documents\Management-Program"
+& "$PSScriptRoot\Connection\Import-Modules.ps1"
+& "$PSScriptRoot\Connection\Connect-Modules.ps1"
 
 # Load the WPF assembly
 Add-Type -AssemblyName PresentationFramework
@@ -13,11 +14,11 @@ function Load-WindowFromXAML {
 }
 
 # Define the paths to the XAML files
-$authPath = "$path\XAML\authentication.xaml"
-$createUserPath = "$path\XAML\createUser.xaml"
-$groupMembershipPath = "$path\XAML\groupMembership.xaml"
-$groupManagementPath = "$path\XAML\groupManagement.xaml"
-$sharedmailboxManagementPath = "$path\XAML\sharedmailboxManagement.xaml"
+$authPath = "$PSScriptRoot\XAML\authentication.xaml"
+$createUserPath = "$PSScriptRoot\XAML\createUser.xaml"
+$groupMembershipPath = "$PSScriptRoot\XAML\groupMembership.xaml"
+$groupManagementPath = "$PSScriptRoot\XAML\groupManagement.xaml"
+$sharedmailboxManagementPath = "$PSScriptRoot\XAML\sharedmailboxManagement.xaml"
 
 # Initialize 
 $allUsers = @()
@@ -32,10 +33,6 @@ $defaultGroups = @("License - M365 Business Premium", "MFA Users", "SSPR Users",
 $authWindow = Load-WindowFromXAML -XamlPath $authPath
 
 # Retrieve controls
-$ConnectToGraphButton = $authWindow.FindName("ConnectToGraphButton")
-$GraphConnectionTextBlock = $authWindow.FindName("GraphConnectionTextBlock")
-$ConnectToExchangeButton = $authWindow.FindName("ConnectToExchangeButton")
-$ExchangeConnectionTextBlock = $authWindow.FindName("ExchangeConnectionTextBlock")
 $CreateUserButton = $authWindow.FindName("CreateUserButton")
 $GroupMembershipButton = $authWindow.FindName("GroupMembershipButton")
 $GroupManagementButton = $authWindow.FindName("GroupManagementButton")
@@ -46,16 +43,15 @@ $CreateUserButton.IsEnabled = $false
 $GroupMembershipButton.IsEnabled = $false
 $GroupManagementButton.IsEnabled = $false
 $SharedMailboxManagementButton.IsEnabled = $false
-$ConnectToExchangeButton.IsEnabled = $false
 
-$ConnectToGraphButton.Add_Click({ 
-    & "$PSScriptRoot\Connection\import-Modules.ps1"
-    & "$PSScriptRoot\Connection\connect-MgGraph.ps1"
-})
-
-$ConnectToExchangeButton.Add_Click({ 
-    & "$PSScriptRoot\Connection\connect-ExchangeOnline.ps1"
-})
+# Check connection
+$connectionInfo = Get-ConnectionInformation | Select-Object -Property State
+if((Get-MgContext) -ne $null -and (Get-ConnectionInformation).state -eq "Connected"){
+    $CreateUserButton.IsEnabled = $true
+    $GroupMembershipButton.IsEnabled = $true
+    $GroupManagementButton.IsEnabled = $true
+    $SharedMailboxManagementButton.IsEnabled = $true
+}
 
 $CreateUserButton.Add_Click({
     # Load the Create User window from XAML
