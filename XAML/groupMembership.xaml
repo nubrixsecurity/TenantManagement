@@ -1,0 +1,43 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="View Group Membership" Height="860" Width="500">
+    <StackPanel Margin="10">
+
+        <!-- Title for Displaying Users Section -->
+        <TextBlock Text="All Users" FontSize="16" FontWeight="Bold" 
+                   Margin="0,20,0,5" HorizontalAlignment="Center"/>
+
+        <!-- TextBox to display users -->
+        <TextBox Name="UserDisplayTextBox" Height="290" Margin="10"
+                 HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+        
+        <!-- Title for User Selection Section -->
+        <TextBlock Text="Select a User" FontSize="16" FontWeight="Bold" 
+                   Margin="10,10,0,5" HorizontalAlignment="Left"/>
+
+        <!-- StackPanel for user selection input and button -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
+            <!-- Input TextBox for user selection -->
+            <TextBox Name="UserSelectionTextBox" Width="20" Height="20" />
+            
+            <!-- Button to select user -->
+            <Button Name="SelectUserButton" Content="Select" Height="20" Width="80" Margin="5,0,0,0"/>
+        
+        <!-- TextBlock to display selected user -->
+            <TextBlock Name="SelectedUserTextBlock" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <!-- Title for Groups Display Section -->
+        <TextBlock Text="Group Membership" FontSize="16" FontWeight="Bold" 
+                   Margin="0,20,0,5" HorizontalAlignment="Center"/>
+
+        <!-- TextBox to display selected user's groups -->
+        <TextBox Name="GroupsDisplayTextBox" Height="250" Margin="10"
+                 HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+
+        <!-- Close Button -->
+        <Button Name="CloseGroupMembershipWindowButton" Content="Close" Height="30" Width="100" 
+            HorizontalAlignment="Center" Margin="0,20,0,0"/>
+
+        
+    </StackPanel>
+</Window>

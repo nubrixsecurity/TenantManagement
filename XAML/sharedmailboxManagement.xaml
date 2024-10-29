@@ -1,0 +1,54 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Delegate Access To Shared Mailbox" Height="900" Width="500">
+    <StackPanel Margin="10">
+        <TextBlock Text="All Users" FontSize="16" FontWeight="Bold" 
+                   Margin="0,20,0,5" HorizontalAlignment="Center"/>
+
+        <TextBox Name="UserDisplayTextBox" Height="200" Margin="10"
+                 HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+
+        <TextBlock Text="Select a User" FontSize="16" FontWeight="Bold" 
+                   Margin="10,10,0,5" HorizontalAlignment="Left"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
+            <TextBox Name="UserSelectionTextBox" Width="20" Height="20" />
+            <Button Name="SelectUserButton" Content="Select" Height="20" Width="80" Margin="5,0,0,0"/>       
+            <TextBlock Name="SelectedUserTextBlock" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TextBlock Text="All Shared Mailboxes" FontSize="16" FontWeight="Bold" 
+                   Margin="0,20,0,5" HorizontalAlignment="Center"/>
+
+        <TextBox Name="AllSharedMailboxesDisplayTextBox" Height="200" Margin="10"
+                 HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+
+        <TextBlock Text="Select a Shared Mailbox" FontSize="16" FontWeight="Bold" 
+                   Margin="10,10,0,5" HorizontalAlignment="Left"/>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
+            <TextBox Name="SharedMailboxSelectionTextBox" Width="20" Height="20" />
+            <Button Name="SelectSharedMailboxButton" Content="Select" Height="20" Width="80" Margin="5,0,0,0"/>
+            <TextBlock Name="SelectedSharedMailboxTextBlock" Margin="10,0,0,0" VerticalAlignment="Center"/>    
+        </StackPanel>
+
+        <TextBlock Text="Confirmation" FontSize="16" FontWeight="Bold" 
+                   Margin="10,10,0,5" HorizontalAlignment="Left"/>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
+            <TextBlock Text="User Id:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Name="ConfirmUserIdSelectionTextBox" Width="240" Height="20" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
+            <TextBlock Text="Mailbox Id:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Name="ConfirmSharedMailboxIdSelectionTextBox" Width="240" Height="20" />
+        </StackPanel>
+ 
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,20,0,10">
+            <Button Name="ConfirmAddButton" Content="Add User to Mailbox" Height="30" Width="175" Margin="5,0,0,0"/>
+            <Button Name="ConfirmRemoveButton" Content="Remove User from Mailbox" Height="30" Width="175" Margin="20,0,0,0"/>
+
+        </StackPanel> 
+        
+    </StackPanel>
+</Window>

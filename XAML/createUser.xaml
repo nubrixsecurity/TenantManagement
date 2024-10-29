@@ -1,0 +1,68 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        Title="Create New User" Height="400" Width="300">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- First Name -->
+            <RowDefinition Height="Auto"/> <!-- Last Name -->
+            <RowDefinition Height="Auto"/> <!-- Username -->
+            <RowDefinition Height="Auto"/> <!-- Domain -->
+            <RowDefinition Height="Auto"/> <!-- Alias -->
+            <RowDefinition Height="Auto"/> <!-- Telephone Extension -->
+            <RowDefinition Height="Auto"/> <!-- Country -->
+            <RowDefinition Height="Auto"/> <!-- Button -->
+            <RowDefinition Height="Auto"/> <!-- Confirmation for User Creation -->
+            <RowDefinition Height="Auto"/> <!-- Confirmation for Default Groups -->
+            <RowDefinition Height="Auto"/> <!-- Confirmation for Alias -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- First Name -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="First Name:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Name="FirstNameTextBox" Margin="0,5,0,5"/>
+
+        <!-- Last Name -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Last Name:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Name="LastNameTextBox" Margin="0,5,0,5"/>
+
+        <!-- Username and Domain
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Username:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Name="UsernameTextBox" Margin="0,5,0,5"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Domain:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <ComboBox Grid.Row="3" Grid.Column="1" Name="DomainComboBox" Margin="0,5,0,5">
+        </ComboBox>
+        -->
+
+        <!-- Email -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Email:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Name="EmailTextBox" Margin="0,5,0,5"/>
+
+        <!-- Alias -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Alias:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Name="AliasTextBox" Margin="0,5,0,5"/>
+
+        <!-- Telephone Extension -->
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Telephone Ext:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <TextBox Grid.Row="5" Grid.Column="1" Name="TelephoneExtTextBox" Margin="0,5,0,5"/>
+
+        <!-- Country -->
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Country:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+        <ComboBox Grid.Row="6" Grid.Column="1" Name="CountryComboBox" Margin="0,5,0,5">
+            <ComboBoxItem Content="US"/>
+            <ComboBoxItem Content="CZ"/>
+            <ComboBoxItem Content="PH"/>
+        </ComboBox>
+
+        <!-- Button to submit the form -->
+        <Button Grid.Row="7" Grid.ColumnSpan="2" Name="CreateUserSubmitButton" Content="Create User"
+                Height="30" Width="100" HorizontalAlignment="Center" Margin="0,15,0,0"/>
+
+        <!-- Confirmation Messages -->
+        <TextBlock Name="ConfirmCreateUserTextBlock" Grid.Row="8" Margin="0,5,0,5" 
+                HorizontalAlignment="Center" TextAlignment="Center" FontWeight="Bold" Foreground="Green"/>
+
+    </Grid>
+</Window>
