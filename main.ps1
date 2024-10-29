@@ -27,7 +27,8 @@ $allSharedMailboxes = @()
 $selectedUserId = $null
 $selectedGroupId = $null
 $selectedSharedMailboxId = $null
-$defaultGroups = @("License - M365 Business Premium", "MFA Users", "SSPR Users", "Intune Users", "LastPass Users", "TEAM")
+#$defaultGroups = @("License - M365 Business Premium", "MFA Users", "SSPR Users", "Intune Users", "LastPass Users", "TEAM")
+$defaultGroups = @("Intune Users", "TEST SEC", "TEST M365")
 
 # Load the main window
 $authWindow = Load-WindowFromXAML -XamlPath $authPath
@@ -63,22 +64,22 @@ $CreateUserButton.Add_Click({
     $EmailTextBox = $createUserWindow.FindName("EmailTextBox")
     $AliasTextBox = $createUserWindow.FindName("AliasTextBox")
     $TelephoneExtTextBox = $createUserWindow.FindName("TelephoneExtTextBox")
-    $CountryComboBox = $createUserWindow.FindName("CountryComboBox")
+    $LocationComboBox = $createUserWindow.FindName("LocationComboBox")
     $CreateUserSubmitButton = $createUserWindow.FindName("CreateUserSubmitButton")
-    $ConfirmCreateUserTextBlock = $createUserWindow.FindName("ConfirmCreateUserTextBlock")
-
+    $UserDetailsTextBox = $createUserWindow.FindName("UserDetailsTextBox")
+    
     # Event handler for submitting the new user creation
     $CreateUserSubmitButton.Add_Click({
         $firstName = $FirstNameTextBox.Text
         $lastName = $LastNameTextBox.Text
         $alias = $AliasTextBox.Text
         $telephoneExt = $TelephoneExtTextBox.Text
-        $country = $CountryComboBox.SelectedItem.Content
+        $location = $LocationComboBox.SelectedItem.Content
         $email = $EmailTextBox.Text
 
         if ([string]::IsNullOrWhiteSpace($firstName) -or [string]::IsNullOrWhiteSpace($lastName) -or 
             [string]::IsNullOrWhiteSpace($email) -or [string]::IsNullOrWhiteSpace($alias) -or 
-            [string]::IsNullOrWhiteSpace($telephoneExt) -or [string]::IsNullOrWhiteSpace($country)) {
+            [string]::IsNullOrWhiteSpace($telephoneExt) -or [string]::IsNullOrWhiteSpace($location)) {
             [System.Windows.MessageBox]::Show("Please fill in all fields.", "Missing Information", 
                                             [System.Windows.MessageBoxButton]::OK, 
                                             [System.Windows.MessageBoxImage]::Warning)
@@ -128,11 +129,13 @@ $CreateUserButton.Add_Click({
                         -AccountEnabled `
                         -PasswordProfile $PasswordProfile `
                         -BusinessPhones $telephoneExt `
-                        -OfficeLocation $office `
-                        -UsageLocation $country `
+                        -OfficeLocation $location `
+                        -UsageLocation "US" `
                         -OtherMails $alias       
             
-            [System.Windows.MessageBox]::Show("User successfully created!")
+            # Show user details in the UserDetailsTextBox
+            [System.Windows.MessageBox]::Show("User was created successfully!")
+            $UserDetailsTextBox.Text = "$email`n$password"
 
             foreach ($groupName in $defaultGroups) {
                 $group = Get-MgGroup -Filter "displayName eq '$groupName'" -ErrorAction SilentlyContinue
@@ -142,14 +145,14 @@ $CreateUserButton.Add_Click({
                 } else {
                     Write-Output "Group not found: $groupName"
                 }
-            }  
-            
+            }
+                       
         }
         catch {
             [System.Windows.MessageBox]::Show("Failed to create user: $_")
         }
 
-        $createUserWindow.Close()
+        #$createUserWindow.Close()
     })
 
     # Show the Create User window
@@ -203,7 +206,7 @@ $GroupMembershipButton.Add_Click({
             $userPrincipalName = $selectedUser.UserPrincipalName
             $user = Get-MgUser -Filter "UserPrincipalName eq '$userPrincipalName'" | select-object id -ErrorAction Stop
             $selectedUserId = $user.id
-            $SelectedUserTextBlock.Text = "Selected: $($selectedUser.DisplayName)"
+            $SelectedUserTextBlock.Text = "Selected User: $($selectedUser.DisplayName)"
 
             # Get groups the user is a member of
             try {                
@@ -326,6 +329,7 @@ $GroupManagementButton.Add_Click({
 
         # Get all groups from Microsoft Graph
         $allGroups = Get-MgGroup -All
+        $sharedMailboxes = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails SharedMailbox
 
         # Initialize an array to hold group details
         $groupsList = @()
@@ -730,9 +734,12 @@ $SharedMailboxManagementButton.Add_Click({
     })
 
     $sharedmailboxManagementWindow.ShowDialog() | Out-Null
-})  
+}) 
+
+
+$authWindow.Add_Closing({
+    Disconnect-ExchangeOnline -Confirm:$false
+    Disconnect-MgGraph
+})
 
 $authWindow.ShowDialog() | Out-Null
-
-Disconnect-ExchangeOnline -Confirm:$false
-Disconnect-MgGraph
