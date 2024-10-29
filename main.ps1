@@ -203,7 +203,7 @@ $GroupMembershipButton.Add_Click({
             $userPrincipalName = $selectedUser.UserPrincipalName
             $user = Get-MgUser -Filter "UserPrincipalName eq '$userPrincipalName'" | select-object id -ErrorAction Stop
             $selectedUserId = $user.id
-            $SelectedUserTextBlock.Text = "Selected User: $($selectedUser.DisplayName)"
+            $SelectedUserTextBlock.Text = "Selected: $($selectedUser.DisplayName)"
 
             # Get groups the user is a member of
             try {                
