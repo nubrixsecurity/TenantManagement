@@ -2,29 +2,25 @@ $ExchangeConnectionTextBlock.Text = "Connecting to Exchange Online..."
 $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Gray
 $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
 
-$maxRetryDuration = 45 # seconds
-$retryInterval = 15 # seconds
-$retryAttempts = $maxRetryDuration / $retryInterval
+# Maximum duration to wait for connection (60 seconds)
+$maxWaitDuration = 60
+$retryInterval = 15  # Adjusted retry interval to 15 seconds
+$elapsedTime = 0
 $connected = $false
-$attempt = 0
-$timeoutPerAttempt = 10 # seconds per attempt to avoid hanging indefinitely
 
-while (-not $connected -and $attempt -lt $retryAttempts) {
-    $attempt++
-    Write-Host "Attempt $attempt - Connecting to Exchange Online..." -ForegroundColor Yellow
+Write-Host "Attempting to connect to Exchange Online..." -ForegroundColor Yellow
 
-    # Start connection attempt in a background job to monitor for timeouts
-    $connectionJob = Start-Job -ScriptBlock {
-        Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
-    }
+# Start connection attempt in a background job
+$connectionJob = Start-Job -ScriptBlock {
+    Connect-ExchangeOnline -ShowBanner:$false -ErrorAction Stop
+}
 
-    # Wait for the job to complete with a timeout
-    $jobCompleted = $connectionJob | Wait-Job -Timeout $timeoutPerAttempt
-
-    # Check if job completed successfully within the timeout
-    if ($jobCompleted) {
+# Loop to track elapsed time and check job status
+while (-not $connected -and $elapsedTime -lt $maxWaitDuration) {
+    # Check if job completed successfully
+    if ($connectionJob.State -eq 'Completed') {
         try {
-            # If successful, check the connection state
+            # Check the connection state
             $connectionInfo = Get-ConnectionInformation | Select-Object -Property State
             if ($connectionInfo.State -eq "Connected") {
                 Write-Host "Connected to Exchange Online successfully!" -ForegroundColor Green
@@ -34,51 +30,54 @@ while (-not $connected -and $attempt -lt $retryAttempts) {
 
                 $SharedMailboxManagementButton.IsEnabled = $true
                 $connected = $true
+                break
             } else {
-                throw "Connection state is not 'Connected'. Retrying..."
+                throw "Connection state is not 'Connected'."
             }
         } catch {
-            Write-Host "Connection failed. Retrying in $retryInterval seconds..." -ForegroundColor Red
-
-            # Countdown for retry
-            for ($i = $retryInterval; $i -gt 0; $i--) {
-                Write-Host "$i" -NoNewline
-
-                $ExchangeConnectionTextBlock.Text = "Retrying in $i seconds"
-                $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Red
-                $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
-
-                Start-Sleep -Seconds 1
-                Write-Host "`r" -NoNewline
-            }
-        }
-    } else {
-        # If the job is hanging, terminate it
-        Write-Host "Connection attempt timed out. Retrying in $retryInterval seconds..." -ForegroundColor Red
-        Stop-Job -Job $connectionJob | Out-Null
-        
-        # Countdown for retry
-        for ($i = $retryInterval; $i -gt 0; $i--) {
-            Write-Host "$i" -NoNewline
-
-            $ExchangeConnectionTextBlock.Text = "Retrying in $i seconds"
-            $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Red
-            $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
-
-            Start-Sleep -Seconds 1
-            Write-Host "`r" -NoNewline
+            Write-Host "Connection failed within initial attempt." -ForegroundColor Red
         }
     }
 
-    # Clean up the job
-    Remove-Job -Job $connectionJob -Force
+    # Display appropriate messages based on elapsed time
+    switch ($elapsedTime) {
+        15 { 
+            Write-Host "Please wait..." -ForegroundColor Yellow 
+            $ExchangeConnectionTextBlock.Text = "Please wait..."
+            $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Gray
+            $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
+        }
+        30 { 
+            Write-Host "Retrying connection..." -ForegroundColor Yellow 
+            $ExchangeConnectionTextBlock.Text = "Retrying connection..."
+            $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Red
+            $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
+        }
+        45 { 
+            Write-Host "Almost there..." -ForegroundColor Yellow 
+            $ExchangeConnectionTextBlock.Text = "Almost there..."
+            $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Gray
+            $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
+        }
+    }
+
+    # Display a 15-second countdown
+    for ($i = $retryInterval; $i -gt 0; $i--) {
+        Write-Host "$i" -NoNewline
+        Start-Sleep -Seconds 1
+        Write-Host "`r" -NoNewline
+    }
+
+    # Increment elapsed time by countdown interval
+    $elapsedTime += $retryInterval
 }
 
-# Check if connection was ultimately unsuccessful
+# If still not connected after 60 seconds, terminate job and show failure
 if (-not $connected) {
-    Write-Host "Unable to connect to Exchange Online after $maxRetryDuration seconds." -ForegroundColor Red
-    $ExchangeConnectionTextBlock.Text = "Failed Connection!"
+    Write-Host "Failed to connect!" -ForegroundColor Red
+    $ExchangeConnectionTextBlock.Text = "Failed to connect!"
     $ExchangeConnectionTextBlock.Foreground = [System.Windows.Media.Brushes]::Red
-    $authWindow.Dispatcher.Invoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{})
+    Stop-Job -Job $connectionJob | Out-Null
+    Remove-Job -Job $connectionJob -Force
     exit 1
 }
