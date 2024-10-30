@@ -6,13 +6,13 @@
 
         <!-- <Separator Margin="0,10,0,10"/> -->
 
-        <TextBlock Text="Management Options" Margin="0,10,0,10" 
+        <TextBlock Text="Main Menu" Margin="0,10,0,10" 
                    HorizontalAlignment="Center" FontWeight="Bold" />
         
-        <Button Name="CreateUserButton" Content="Create New User" Height="30" Width="175" Margin="2,6"/>
-        <Button Name="GroupMembershipButton" Content="View Group Membership" Height="30" Width="175" Margin="2,6"/>
-        <Button Name="GroupManagementButton" Content="Group Assignment" Height="30" Width="175" Margin="2,6"/>
-        <Button Name="SharedMailboxManagementButton" Content="Shared Mailbox Assignment" Height="30" Width="175" Margin="2,6"/>
+        <Button Name="CreateUserButton" Content="Create New User" Height="30" Width="180" Margin="2,6"/>
+        <Button Name="GroupMembershipButton" Content="View Group Membership" Height="30" Width="180" Margin="2,6"/>
+        <Button Name="GroupManagementButton" Content="Group Management" Height="30" Width="180" Margin="2,6"/>
+        <Button Name="SharedMailboxManagementButton" Content="Shared Mailbox Management" Height="30" Width="180" Margin="2,6"/>
 
     </StackPanel>
 </Window>
