@@ -1,5 +1,5 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="Add User To Group" Height="1000" Width="500">
+        Title="Add User To Group" Height="900" Width="500">
     <StackPanel Margin="10">
         <TextBlock Text="All Users" FontSize="16" FontWeight="Bold" 
                    Margin="0,20,0,5" HorizontalAlignment="Center"/>
