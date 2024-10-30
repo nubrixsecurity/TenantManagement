@@ -3,7 +3,7 @@
 PLEASE READ THIS SECTION
 
 The steps outlined below will run the program and create a shortcut named 
-Management-Program on your desktop for easy use. 
+ExpatRide-Management-Program on your desktop for easy use. 
 
 You will only need to follow these steps ONCE!
 
@@ -14,7 +14,7 @@ To get started:
 try { git --version } catch { Start-Process winget -ArgumentList "install", "--id", "Git.Git", "-e", "--source", "winget" -Verb RunAs -Wait }; Start-Process powershell -ArgumentList "-Command Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force" -Verb RunAs -Wait; Rename-Item -Path "$env:USERPROFILE\Downloads\start.txt" -NewName "start.ps1"; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$env:USERPROFILE\Downloads\start.ps1`"" -Verb RunAs -Wait; Start-Process -FilePath "$env:USERPROFILE\Desktop\Management-Program.lnk" -Wait; Exit
 
 3. Say YES to all prompts
-4. Go to the Desktop and launch the Management-Program
+4. Go to Desktop and launch the Managed-Program app
 
 ##########>
 
@@ -39,12 +39,24 @@ foreach ($file in $files) {
 $scriptPath = Join-Path -Path $clonePath -ChildPath "main.ps1"
 $shortcutPath = Join-Path -Path $env:USERPROFILE -ChildPath "Desktop\Management-Program.lnk"
 
+# Check if the shortcut already exists
+if (Test-Path $shortcutPath) {
+    # If it exists, delete it
+    Remove-Item $shortcutPath -Force
+}
+
+# Create a new shortcut
 $wsh = New-Object -ComObject WScript.Shell
 $shortcut = $wsh.CreateShortcut($shortcutPath)
 $shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 $shortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`""
 $shortcut.WorkingDirectory = $clonePath
-$shortcut.IconLocation = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+
+# Set the custom icon location (replace with your actual icon path)
+$iconPath = "$clonePath\icon.ico"
+$shortcut.IconLocation = $iconPath
+
+# Save the shortcut
 $shortcut.Save()
 
 # Clean up
