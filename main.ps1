@@ -194,7 +194,7 @@ $UserManagementButton.Add_Click({
 
         $userList = $allUsers | ForEach-Object { 
             if ($_.AccountEnabled -eq $true) { $state = "Enabled" } else { $state = "Disabled" }
-            "[$([Array]::IndexOf($allUsers, $_) + 1)] $($_.DisplayName) | $($_.UserPrincipalName) | $State" 
+            "[$([Array]::IndexOf($allUsers, $_) + 1)] $($_.DisplayName) | $($_.UserPrincipalName) | $state" 
         }
         $UserManagementDisplayTextBox.Text = $userList -join "`r`n"
 
@@ -206,9 +206,9 @@ $UserManagementButton.Add_Click({
     $SelectUserManagementButton.Add_Click({
         $selectedIndex = $SelectionUserManagementTextBox.Text -as [int]
         
-        $allUsers = Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled `
+        $allUsers = Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, id `
             | Where-Object { $_.UserPrincipalName -notlike "*onmicrosoft.com" } `
-            | Select-Object DisplayName, UserPrincipalName, AccountEnabled
+            | Select-Object DisplayName, UserPrincipalName, AccountEnabled, id
 
         if ($null -eq $selectedIndex -or $selectedIndex -le 0 -or $selectedIndex -gt $allUsers.Count) {
             $SelectedUserManagementTextBlock.Text = "Invalid selection. Please enter a number between 1 and $($allUsers.Count)."
@@ -216,19 +216,18 @@ $UserManagementButton.Add_Click({
         } else {        
             $selectedUser = $allUsers[$selectedIndex - 1]
             $userPrincipalName = $selectedUser.UserPrincipalName
-            $user = Get-MgUser -Filter "UserPrincipalName eq '$userPrincipalName'" | select-object id -ErrorAction Stop
-            $selectedUserId = $user.id
-            if ($user.AccountEnabled -eq $true) { $selectedUserState = "Enabled" } else { $selectedUserState = "Disabled" }
-            $SelectedUserManagementTextBlock.Text = "Selected: $($selectedUser.DisplayName) ($selectedUserState)"          
+            $userId = $selectedUser.Id
+            if ($selectedUser.AccountEnabled -eq $true) { $state = "Enabled" } else { $state = "Disabled" }
+            $SelectedUserManagementTextBlock.Text = "Selected: $($selectedUser.DisplayName) ($state)"          
         }
 
         # Function to copy user and group info to clipboard
         function CopyToClipboard {
-            if ($null -eq $selectedUserId) {
+            if ($null -eq $userId) {
                 return
             }
 
-            $clipboardText = $selectedUserId
+            $clipboardText = $userId
 
             # Copy the concatenated string to the clipboard
             [System.Windows.Clipboard]::SetText($clipboardText)
