@@ -287,7 +287,7 @@ $UserManagementButton.Add_Click({
 
         })
 
-        #$userManagementWindow.Close()
+        $userManagementWindow.Close()
 
     })
 
