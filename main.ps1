@@ -17,6 +17,7 @@ function Load-WindowFromXAML {
 $authPath = "$PSScriptRoot\XAML\authentication.xaml"
 $createUserPath = "$PSScriptRoot\XAML\createUser.xaml"
 $userManagementPath = "$PSScriptRoot\XAML\userManagement.xaml"
+$resetPasswordPath = "$PSScriptRoot\XAML\resetPassword.xaml"
 $staleAccountsPath = "$PSScriptRoot\XAML\staleAccounts.xaml"
 $groupMembershipPath = "$PSScriptRoot\XAML\groupMembership.xaml"
 $groupManagementPath = "$PSScriptRoot\XAML\groupManagement.xaml"
@@ -169,7 +170,7 @@ $CreateUserButton.Add_Click({
 
 $UserManagementButton.Add_Click({
     # Load the Create User window from XAML
-    $userManagementWindow = Load-WindowFromXAML -XamlPath $UserManagementPath
+    $userManagementWindow = Load-WindowFromXAML -XamlPath $userManagementPath
 
     # Find controls in the second window
     $UserManagementDisplayTextBox = $userManagementWindow.FindName("UserManagementDisplayTextBox")
@@ -177,8 +178,10 @@ $UserManagementButton.Add_Click({
     $SelectUserManagementButton = $userManagementWindow.FindName("SelectUserManagementButton")
     $SelectedUserManagementTextBlock = $userManagementWindow.FindName("SelectedUserManagementTextBlock")
     $ConfirmUserManagementIdSelectionTextBox = $userManagementWindow.FindName("ConfirmUserManagementIdSelectionTextBox")
+    $EnableUserManagementButton = $userManagementWindow.FindName("EnableUserManagementButton")
     $DisableUserManagementButton = $userManagementWindow.FindName("DisableUserManagementButton")
     $DeleteUserManagementButton = $userManagementWindow.FindName("DeleteUserManagementButton")
+    $ResetUserManagementButton = $userManagementWindow.FindName("ResetUserManagementButton")
 
     $allUsers = @()
 
@@ -206,6 +209,8 @@ $UserManagementButton.Add_Click({
     $SelectUserManagementButton.Add_Click({
         $selectedIndex = $SelectionUserManagementTextBox.Text -as [int]
         
+        $allUsers = @()
+
         $allUsers = Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, id `
             | Where-Object { $_.UserPrincipalName -notlike "*onmicrosoft.com" } `
             | Select-Object DisplayName, UserPrincipalName, AccountEnabled, id
@@ -248,6 +253,27 @@ $UserManagementButton.Add_Click({
         # Call function to append clipboard content to the TextBox
         PasteClipboardToTextBox -textBox $ConfirmUserManagementIdSelectionTextBox
 
+        $EnableUserManagementButton.Add_Click({
+            $selectUserId = $ConfirmUserManagementIdSelectionTextBox.Text
+
+            # Validation step
+            if ([string]::IsNullOrWhiteSpace($selectUserId)) {
+                [System.Windows.MessageBox]::Show("Please fill out the User Id before proceeding.", "Validation Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+                return
+            }
+
+            # Try to add the user to the group
+            try {
+                Update-MgUser -UserId $selectUserId -AccountEnabled:$true
+                [System.Windows.MessageBox]::Show("User was enabled successfully.")
+            } catch {
+                [System.Windows.MessageBox]::Show("Failed to enable user: $_")
+            }
+
+            $userManagementWindow.Close()
+
+        })
+        
         $DisableUserManagementButton.Add_Click({
             $selectUserId = $ConfirmUserManagementIdSelectionTextBox.Text
 
@@ -264,6 +290,8 @@ $UserManagementButton.Add_Click({
             } catch {
                 [System.Windows.MessageBox]::Show("Failed to disable user: $_")
             }
+
+            $userManagementWindow.Close()
 
         })
 
@@ -284,9 +312,89 @@ $UserManagementButton.Add_Click({
                 [System.Windows.MessageBox]::Show("Failed to delete user: $_")
             }
 
+            $userManagementWindow.Close()
+
         })
 
-        $userManagementWindow.Close()
+        $ResetUserManagementButton.Add_Click({
+            $resetPasswordWindow = Load-WindowFromXAML -XamlPath $resetPasswordPath
+
+            $ConfirmUserIdSelectionTextBox = $resetPasswordWindow.FindName("ConfirmUserIdSelectionTextBox")
+            $NewPasswordBox = $resetPasswordWindow.FindName("NewPasswordBox")
+            $ConfirmPasswordBox = $resetPasswordWindow.FindName("ConfirmPasswordBox")
+            $ResetOnNextLogonCheckBox = $resetPasswordWindow.FindName("ResetOnNextLogonCheckBox")
+            $ConfirmButton = $resetPasswordWindow.FindName("ConfirmButton")
+
+            # Function to paste clipboard content into a specific TextBox with appending
+            function PasteClipboardToTextBox {
+                param ($textBox)
+                if ([System.Windows.Clipboard]::ContainsText()) {
+                    $clipboardText = [System.Windows.Clipboard]::GetText()
+                    $textBox.Text = $clipboardText
+                }
+            }
+
+            # Call function to append clipboard content to the TextBox
+            PasteClipboardToTextBox -textBox $ConfirmUserIdSelectionTextBox
+
+            # Define function to check if passwords match
+            function CheckPasswordMatch {
+                $password = $NewPasswordBox.Password
+                $confirmPassword = $ConfirmPasswordBox.Password
+
+                # Check if passwords match, meet minimum length, and contain letters, numbers, and special characters
+                if ($password -eq $confirmPassword -and 
+                    $password.Length -ge 8 -and                     # Minimum length requirement
+                    $password -match '[A-Za-z]' -and                # At least one letter
+                    $password -match '\d' -and                      # At least one number
+                    $password -match '[\W_]'                        # At least one special character
+                ) {
+                    $ConfirmButton.IsEnabled = $true
+                } else {
+                    $ConfirmButton.IsEnabled = $false
+                }
+            }
+
+            # Attach password matching events
+            $NewPasswordBox.add_PasswordChanged({ CheckPasswordMatch })
+            $ConfirmPasswordBox.add_PasswordChanged({ CheckPasswordMatch })
+
+            $ConfirmButton.Add_Click({
+                $userId = $ConfirmUserIdSelectionTextBox.Text
+                $newPassword = $ConfirmPasswordBox.Password
+                $resetOnNextLogon = $ResetOnNextLogonCheckBox.IsChecked -eq $true
+
+                # Check if user ID and passwords are not empty
+                if ([string]::IsNullOrWhiteSpace($userId) -or [string]::IsNullOrWhiteSpace($newPassword)) {
+                    [System.Windows.MessageBox]::Show("User ID and new password cannot be empty.")
+                    return
+                }
+
+                # Confirm that passwords match
+                if ($newPassword -ne $ConfirmPasswordBox.Password) {
+                    [System.Windows.MessageBox]::Show("Passwords do not match.")
+                    return
+                }
+
+                try {
+                    Update-MgUser -UserId $userId -PasswordProfile @{ 
+                        Password = $newPassword
+                        ForceChangePasswordNextSignIn = $resetOnNextLogon  
+                    }
+
+                    [System.Windows.MessageBox]::Show("Password reset successfully.`nReset on next sign-in: $resetOnNextLogon")
+                } catch {
+                    [System.Windows.MessageBox]::Show("Error resetting password: $_.Exception.Message")
+                } 
+
+                $resetPasswordWindow.Close()
+                $userManagementWindow.Close()
+
+            })
+
+            $resetPasswordWindow.ShowDialog()
+
+        })
 
     })
 
@@ -294,10 +402,8 @@ $UserManagementButton.Add_Click({
 }) 
 
 $StaleAccountsButton.Add_Click({
-    # Load the Create User window from XAML
     $staleAccountWindow = Load-WindowFromXAML -XamlPath $staleAccountsPath
 
-    # Find controls in the second window
     $StaleAcccountDisplayTextBox = $staleAccountWindow.FindName("StaleAcccountDisplayTextBox")
     $StaleAccountSelectionTextBox = $staleAccountWindow.FindName("StaleAccountSelectionTextBox")
     $SelectStaleAccountButton = $staleAccountWindow.FindName("SelectStaleAccountButton")
@@ -306,26 +412,30 @@ $StaleAccountsButton.Add_Click({
     $DisableStaleAccountButton = $staleAccountWindow.FindName("DisableStaleAccountButton")
     $DeleteStaleAccountButton = $staleAccountWindow.FindName("DeleteStaleAccountButton")
 
+    $staleAccounts = @()
+
     try {
         $daysInactive = 90
         $cutoffDate = (Get-Date).AddDays(-$daysInactive)
 
-        $staleAccounts = Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, SignInActivity `
-            | Where-Object { $_.SignInActivity.LastSignInDateTime -ne $null -and $_.SignInActivity.LastSignInDateTime -lt $cutoffDate } `
-            | Select-Object DisplayName, UserPrincipalName, AccountEnabled, @{Name="LastSignIn"; Expression={$_.SignInActivity.LastSignInDateTime}}
+        # Ensure $staleAccounts is treated as an array, even if only one item is returned
+        $staleAccounts = @(Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, SignInActivity | 
+            Where-Object { $_.SignInActivity.LastSignInDateTime -ne $null -and $_.SignInActivity.LastSignInDateTime -lt $cutoffDate } |
+            Select-Object DisplayName, UserPrincipalName, AccountEnabled, @{Name="LastSignIn"; Expression={$_.SignInActivity.LastSignInDateTime}})
 
         if ($staleAccounts.Count -eq 0) {
             $StaleAcccountDisplayTextBox.Text = "No stale accounts were found."
             return
-        } else {
-            $staleUserList = $staleAccounts | ForEach-Object {
-                if ($_.AccountEnabled -eq $true) { $state = "Enabled" } else { $state = "Disabled" }
-                "[$([Array]::IndexOf($staleAccounts, $_) + 1)] $($_.DisplayName) | $($_.UserPrincipalName) | $state"
-            }
-        }
+        } 
 
-        $StaleAcccountDisplayTextBox.Text = $staleUserList -join "`r`n"
+        # Generate the list with index numbers
+        $staleUserList = $staleAccounts | ForEach-Object {
+            if ($_.AccountEnabled) { $state = "Enabled" } else { $state = "Disabled" }
+            "[$([Array]::IndexOf($staleAccounts, $_) + 1)] $($_.DisplayName) | $($_.UserPrincipalName) | $state"
+        }
         
+        $StaleAcccountDisplayTextBox.Text = $staleUserList -join "`r`n"
+
     } catch {
         $StaleAcccountDisplayTextBox.Text = "Failed to retrieve users: $_"
     }
@@ -334,16 +444,9 @@ $StaleAccountsButton.Add_Click({
     $SelectStaleAccountButton.Add_Click({
         $selectedIndex = $StaleAccountSelectionTextBox.Text -as [int]
 
-        $staleAccounts = Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, SignInActivity `
-            | Where-Object { 
-                $_.SignInActivity.LastSignInDateTime -ne $null -and 
-                $_.SignInActivity.LastSignInDateTime -lt $cutoffDate 
-                } `
-            | Select-Object `
-                DisplayName, `
-                UserPrincipalName, `
-                AccountEnabled, `
-                @{Name="LastSignIn"; Expression={$_.SignInActivity.LastSignInDateTime}}
+        $staleAccounts = @(Get-MgUser -All -Property DisplayName, UserPrincipalName, AccountEnabled, Id, SignInActivity `
+            | Where-Object { $_.SignInActivity.LastSignInDateTime -ne $null -and $_.SignInActivity.LastSignInDateTime -lt $cutoffDate } `
+            | Select-Object DisplayName, UserPrincipalName, AccountEnabled, Id, @{Name="LastSignIn"; Expression={$_.SignInActivity.LastSignInDateTime}})
 
         if ($null -eq $selectedIndex -or $selectedIndex -le 0 -or $selectedIndex -gt $staleAccounts.Count) {
             $SelectedStaleAccountTextBlock.Text = "Invalid selection. Please enter a number between 1 and $($staleAccounts.Count)."
@@ -351,18 +454,18 @@ $StaleAccountsButton.Add_Click({
         } else {        
             $selectedUser = $staleAccounts[$selectedIndex - 1]
             $userPrincipalName = $selectedUser.UserPrincipalName
-            $user = Get-MgUser -Filter "UserPrincipalName eq '$userPrincipalName'" | select-object id -ErrorAction Stop
-            if ($user.AccountEnabled -eq $true) { $selectedUserState = "Enabled" } else { $selectedUserState = "Disabled" }
-            $SelectedStaleAccountTextBlock.Text = "Selected: $($selectedUser.DisplayName) ($selectedUserState)"          
+            $userId = $selectedUser.Id
+            if ($selectedUser.AccountEnabled -eq $true) { $state = "Enabled" } else { $state = "Disabled" }
+            $SelectedStaleAccountTextBlock.Text = "Selected: $($selectedUser.DisplayName) ($state)"          
         }
 
         # Function to copy user and group info to clipboard
         function CopyToClipboard {
-            if ($null -eq $selectedUserId) {
+            if ($null -eq $userId) {
                 return
             }
 
-            $clipboardText = $selectedUserId
+            $clipboardText = $userId
 
             # Copy the concatenated string to the clipboard
             [System.Windows.Clipboard]::SetText($clipboardText)
