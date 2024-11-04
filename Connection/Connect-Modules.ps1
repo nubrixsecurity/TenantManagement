@@ -5,7 +5,7 @@ try{
 
     try {
         Write-Host "Connecting to Microsoft Graph" -ForegroundColor Yellow
-        $scopes = @("Group.ReadWrite.All", "User.ReadWrite.All", "Directory.ReadWrite.All","Directory.AccessAsUser.All")
+        $scopes = @("Group.ReadWrite.All", "User.ReadWrite.All", "Directory.ReadWrite.All", "Directory.AccessAsUser.All")
         Connect-MgGraph -Scopes $scopes
 
         Write-Host "Connected to Microsoft Graph successfully!" -ForegroundColor Green
