@@ -1,19 +1,19 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="View Stale Accounts" Height="450" Width="500">
+        Title="User Management" Height="600" Width="550">
     <StackPanel Margin="10">
-        <TextBlock Text="Stale Accounts (inactive for 90 days)" FontSize="16" FontWeight="Bold" 
+        <TextBlock Text="All Users" FontSize="16" FontWeight="Bold" 
                    Margin="0,20,0,5" HorizontalAlignment="Center"/>
 
-        <TextBox Name="StaleAcccountDisplayTextBox" Height="100" Margin="10"
+        <TextBox Name="UserManagementDisplayTextBox" Height="200" Margin="10"
                  HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
 
         <TextBlock Text="Select a User" FontSize="16" FontWeight="Bold" 
                    Margin="10,10,0,5" HorizontalAlignment="Left"/>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
-            <TextBox Name="StaleAccountSelectionTextBox" Width="20" Height="20" />
-            <Button Name="SelectStaleAccountButton" Content="Select" Height="20" Width="80" Margin="5,0,0,0"/>       
-            <TextBlock Name="SelectedStaleAccountTextBlock" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            <TextBox Name="SelectionUserManagementTextBox" Width="20" Height="20" />
+            <Button Name="SelectUserManagementButton" Content="Select" Height="20" Width="80" Margin="5,0,0,0"/>       
+            <TextBlock Name="SelectedUserManagementTextBlock" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
 
        <TextBlock Text="Confirmation" FontSize="16" FontWeight="Bold" 
@@ -21,13 +21,17 @@
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10">
             <TextBlock Text="User Id:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBox Name="ConfirmStaleAccountIdSelectionTextBox" Width="240" Height="20" />
+            <TextBox Name="ConfirmUserManagementIdSelectionTextBox" Width="240" Height="20" />
         </StackPanel>
  
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,20,0,10">
-            <Button Name="DisableStaleAccountButton" Content="Disable User" Height="30" Width="150" Margin="5,0,0,0"/>
-            <Button Name="DeleteStaleAccountButton" Content="Delete User" Height="30" Width="150" Margin="20,0,0,0"/>
+            <Button Name="EnableUserManagementButton" Content="Enable User" Height="30" Width="150" Margin="5,0,0,0"/>
+            <Button Name="DisableUserManagementButton" Content="Disable User" Height="30" Width="150" Margin="15,0,0,0"/>
+        </StackPanel> 
 
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,5,0,5">
+            <Button Name="ResetUserManagementButton" Content="Reset Password" Height="30" Width="150" Margin="5,0,0,0"/>
+            <Button Name="DeleteUserManagementButton" Content="Delete User" Height="30" Width="150" Margin="15,0,0,0"/>
         </StackPanel> 
         
     </StackPanel>
