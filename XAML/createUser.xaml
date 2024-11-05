@@ -50,7 +50,7 @@
                      BorderBrush="#A1A1A1" BorderThickness="1" Background="White"/>
 
             <!-- Telephone Extension -->
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Telephone Ext:" VerticalAlignment="Center" 
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Extension (e.g. x486)" VerticalAlignment="Center" 
                        Margin="0,5,5,5" FontSize="16" FontWeight="Bold"/>
             <TextBox Grid.Row="4" Grid.Column="1" Name="TelephoneExtTextBox" 
                      Margin="0,5,0,5" Padding="5" 
