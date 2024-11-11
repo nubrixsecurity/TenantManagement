@@ -14,7 +14,7 @@ To get started:
 try { git --version } catch { Start-Process winget -ArgumentList "install", "--id", "Git.Git", "-e", "--source", "winget" -Verb RunAs -Wait }; Start-Process powershell -ArgumentList "-Command Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force" -Verb RunAs -Wait; Rename-Item -Path "$env:USERPROFILE\Downloads\start.txt" -NewName "start.ps1"; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$env:USERPROFILE\Downloads\start.ps1`"" -Verb RunAs -Wait; Start-Process -FilePath "$env:USERPROFILE\Desktop\Management-Program.lnk" -Wait; Exit
 
 3. Say YES to all prompts
-4. Go to Desktop and launch the Managed-Program app
+4. Go to Desktop and launch the Management-Program app
 
 ##########>
 
