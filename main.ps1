@@ -30,8 +30,13 @@ $allSharedMailboxes = @()
 $selectedUserId = $null
 $selectedGroupId = $null
 $selectedSharedMailboxId = $null
-$defaultGroups = @("License - M365 Business Premium", "MFA Users", "SSPR Users", "Intune - Users", "Intune - Default Apps", "LastPass Users", "TEAM")
-
+$defaultGroups = @("License - M365 Business Premium", `
+                    "MFA Users", `
+                    "SSPR Users", `
+                    "Intune - Users", `
+                    "Intune - Default Apps", `
+                    "LastPass Users", `
+                    "TEAM")
 
 # Load the main window
 $authWindow = Load-WindowFromXAML -XamlPath $authPath
